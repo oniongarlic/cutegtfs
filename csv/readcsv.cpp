@@ -4,7 +4,9 @@
 
 #include "csv/readcsv.h"
 
-readCSV::readCSV(QObject *parent) : QObject(parent)
+readCSV::readCSV(QObject *parent)
+    : QObject(parent)
+    , m_header(true)
 {
 
 }
