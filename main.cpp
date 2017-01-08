@@ -27,6 +27,15 @@ void testCSV()
     qDebug() << csv.getData();
 }
 
+bool importData()
+{
+    GTFSImporter gtfs_imp(db);
+    gtfs_imp.initialize();
+
+    GTFSArchiveParser ga(&gtfs_imp);
+    return ga.readArchive("gtfs.zip");
+}
+
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
@@ -45,11 +54,7 @@ int main(int argc, char *argv[])
     qDebug() << tables;
 
     if (tables.count()==0) {
-        GTFSImporter gtfs_imp(db);
-        gtfs_imp.initialize();
-
-        GTFSArchiveParser ga(&gtfs_imp);
-        ga.readArchive("gtfs.zip");
+        importData();
     }
 
     GTFSService gtfs(db);
