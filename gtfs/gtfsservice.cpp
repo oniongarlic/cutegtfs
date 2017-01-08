@@ -24,28 +24,44 @@ GTFSService::GTFSService(QSqlDatabase db, QObject *parent) : QObject(parent)
     m_has_freq=tables.contains("frequencies");
 }
 
-QString GTFSService::findStop(QString stop_name)
+QString GTFSService::getOne(QSqlQuery &q)
 {
-    QSqlQuery q(m_db);
-
-    q.setForwardOnly(true);
     QString r;
 
-    q.prepare("SELECT stop_id FROM stops WHERE stop_id=? OR stop_code=? OR stop_name=?");
-    q.bindValue(0, stop_name);
-    q.bindValue(1, stop_name);
-    q.bindValue(2, stop_name);
     if (!q.exec()) {
         qWarning("Query failed");
+        qDebug() << q.lastError().text();
         return r;
     }
     if (q.isActive() && q.first()) {
         r.append(q.value(0).toString());
     } else {
-        qDebug("No results");
-        qDebug() << q.lastQuery();
+        qDebug() << q.lastQuery() << q.lastError().text();
     }
+
     return r;
+}
+
+QString GTFSService::findStop(QString stop_name)
+{
+    QSqlQuery q(m_db);
+
+    q.setForwardOnly(true);
+
+    qDebug() << "Search for " << stop_name;
+
+#if 0
+    q.prepare("SELECT stop_id FROM stops WHERE stop_id=? OR stop_code=? OR stop_name=?");
+    q.bindValue(0, stop_name);
+    q.bindValue(1, stop_name);
+    q.bindValue(2, stop_name);
+#else
+    q.prepare("SELECT stop_id FROM stops WHERE stop_id=:id OR stop_code=:id OR stop_name like :idl");
+    q.bindValue(":id", stop_name);
+    q.bindValue(":idl", "%"+stop_name+"%");
+#endif
+
+    return getOne(q);
 }
 
 QString GTFSService::findStops(QString stop_name)
@@ -54,10 +70,10 @@ QString GTFSService::findStops(QString stop_name)
 
     q.prepare("SELECT stop_id,stop_code,stop_name,stop_lat,stop_lon FROM stops WHERE stop_name like'%?%'");
     q.bindValue(0, stop_name);
-    q.exec();
+    return getOne(q);
 }
 
-QString GTFSService::findNearestStop(QPointF pos, int type, double range)
+QString GTFSService::findNearestStop(const QPointF &pos, int type, double range)
 {
     QSqlQuery q(m_db);
 
@@ -66,5 +82,5 @@ QString GTFSService::findNearestStop(QPointF pos, int type, double range)
     q.bindValue(":lon", pos.y());
     q.bindValue(":r", range);
     q.bindValue(":type", type);
-    q.exec();
+    return getOne(q);
 }

@@ -26,13 +26,14 @@ public:
 
     QString findStop(QString stop_name);
     QString findStops(QString stop_name);    
-    QString findNearestStop(QPointF pos, int type, double range);
+    QString findNearestStop(const QPointF &pos, int type, double range);
 signals:
 
 public slots:
 
 protected:    
 
+    QString getOne(QSqlQuery &q);
 private:
     QSqlDatabase m_db;
     bool m_has_fares;

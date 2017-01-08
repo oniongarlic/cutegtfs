@@ -6,6 +6,8 @@
 #include <QSqlQuery>
 #include <QSqlError>
 
+#include <QPointF>
+
 #include <quazip/quazip.h>
 #include <quazip/quazipfile.h>
 
@@ -58,8 +60,17 @@ int main(int argc, char *argv[])
     }
 
     GTFSService gtfs(db);
+
+    qDebug() << gtfs.findStop("T2");
+
+    qDebug() << gtfs.findStop("T22");
+
     qDebug() << gtfs.findStop("1170");
     qDebug() << gtfs.findStop("Paattisten kirkko");
+
+    qDebug() << gtfs.findStop("Paattis");
+
+    qDebug() << gtfs.findNearestStop(QPointF(60.59198, 22.38185), 0, 1000);
 
     db.close();
 

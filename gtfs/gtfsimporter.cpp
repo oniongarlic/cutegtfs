@@ -161,6 +161,7 @@ bool GTFSImporter::import(const QString table, const QStringList headers, const 
         // catch invalid rows
         if (hc!=i.value().size()) {
             qWarning("Invalid GTFS data row");
+            qDebug() << hc << i.value().size();
             continue;
         }
 
