@@ -9,10 +9,10 @@
 #include <quazip/quazip.h>
 #include <quazip/quazipfile.h>
 
-#include "readcsv.h"
-#include "gtfsimporter.h"
-#include "gtfsarchiveparser.h"
-#include "gtfsservice.h"
+#include "csv/readcsv.h"
+#include "gtfs/gtfsimporter.h"
+#include "gtfs/gtfsarchiveparser.h"
+#include "gtfs/gtfsservice.h"
 
 QSqlDatabase db;
 

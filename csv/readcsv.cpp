@@ -2,7 +2,7 @@
 #include <QFile>
 #include <QDebug>
 
-#include "readcsv.h"
+#include "csv/readcsv.h"
 
 readCSV::readCSV(QObject *parent) : QObject(parent)
 {

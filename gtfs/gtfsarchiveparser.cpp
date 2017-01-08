@@ -3,7 +3,7 @@
 #include <quazip/quazip.h>
 #include <quazip/quazipfile.h>
 
-#include "readcsv.h"
+#include "csv/readcsv.h"
 
 GTFSArchiveParser::GTFSArchiveParser(GTFSImporter *importer, QObject *parent) : QObject(parent)
 {

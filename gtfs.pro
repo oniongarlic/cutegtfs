@@ -12,7 +12,7 @@ LIBS += -lz -lquazip
 TEMPLATE = app
 
 SOURCES += main.cpp \
-    cvs/readcsv.cpp \
+    csv/readcsv.cpp \
     gtfs/gtfsimporter.cpp \
     gtfs/gtfsarchiveparser.cpp \
     gtfs/gtfsservice.cpp
