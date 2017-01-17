@@ -24,7 +24,7 @@ public:
     //Q_INVOKABLE findNearestStops();
     //Q_INVOKABLE getRoutes();
 
-    QString findStop(QString stop_name);
+    QString findStop(const QString stop_name);
     QString findStops(QString stop_name);    
     QString findNearestStop(const QPointF &pos, int type, double range);
 signals:

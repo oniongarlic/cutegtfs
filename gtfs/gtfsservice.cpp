@@ -1,12 +1,12 @@
 #include "gtfsservice.h"
 
-#define SELECT_NEAREST_STOP "SELECT stop_id,stop_code,stop_name,((:lat-stop_lat)*(:lat-stop_lat))+((:lon-stop_lon)*(:lon-stop_lon)) AS d," \
+#define SELECT_NEAREST_STOP "SELECT stop_id,stop_code,stop_name,((:lat-:stop_lat)*(:lat-:stop_lat))+((:lon-:stop_lon)*(:lon-:stop_lon)) AS d," \
         " stop_lat,stop_lon FROM stops WHERE location_type=:type "\
         " AND stop_lat BETWEEN :lat-:r AND :lat+:r "\
         " AND stop_lon BETWEEN :lon-:r AND :lon+:r "\
         " ORDER BY d LIMIT 1"
 
-#define SELECT_NEAREST_STOPS "SELECT stop_id,stop_code,stop_name,((:lat-stop_lat)*(:lat-stop_lat))+((:lon-stop_lon)*(:lon-stop_lon)) AS d," \
+#define SELECT_NEAREST_STOPS "SELECT stop_id,stop_code,stop_name,((:lat-:stop_lat)*(:lat-:stop_lat))+((:lon-:stop_lon)*(:lon-:stop_lon)) AS d," \
         " stop_lat,stop_lon FROM stops WHERE location_type=:type "\
         " AND stop_lat BETWEEN :lat-:r AND :lat+:r "\
         " AND stop_lon BETWEEN :lon-:r AND :lon+:r "\
@@ -42,7 +42,7 @@ QString GTFSService::getOne(QSqlQuery &q)
     return r;
 }
 
-QString GTFSService::findStop(QString stop_name)
+QString GTFSService::findStop(const QString stop_name)
 {
     QSqlQuery q(m_db);
 
@@ -56,8 +56,8 @@ QString GTFSService::findStop(QString stop_name)
     q.bindValue(1, stop_name);
     q.bindValue(2, stop_name);
 #else
-    q.prepare("SELECT stop_id FROM stops WHERE stop_id=:id OR stop_code=:id OR stop_name like :idl");
-    q.bindValue(":id", stop_name);
+    q.prepare("SELECT stop_id FROM stops WHERE stop_id= :ida OR stop_code= :ida OR stop_name like :idl");
+    q.bindValue(":ida", stop_name);
     q.bindValue(":idl", "%"+stop_name+"%");
 #endif
 
