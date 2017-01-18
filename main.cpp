@@ -68,9 +68,31 @@ int main(int argc, char *argv[])
     qDebug() << gtfs.findStop("1170");
     qDebug() << gtfs.findStop("Paattisten kirkko");
 
-    qDebug() << gtfs.findStop("Paattis");
+    qDebug() << gtfs.findStops("Paattis");
 
-    qDebug() << gtfs.findNearestStop(QPointF(60.59198, 22.38185), 0, 1000);
+    //1127,,Paattisten kirkko,,60.59149206168896,22.38063743684942,FÖLI,,0,,Europe/Helsinki
+    //1170,,Paattisten kirkko,,60.59145527814784,22.38009434217617,FÖLI,,0,,Europe/Helsinki
+    //1171,,Paattisten kirkko,,60.5907081332966,22.37798961826015,FÖLI,,0,,Europe/Helsinki
+
+    qDebug() << gtfs.findNearestStop(QPointF(60.59198f, 22.38185f), 0, 0.01f);
+
+    GTFSStop *s=gtfs.getStop("1170");
+
+    if (s) {
+        qDebug() << s->id << s->location.x() << s->location.y() << s->name << s->desc << s->type;
+
+        //
+        qDebug() << gtfs.findNearestStops(s->location, 0, 0.009f);
+
+        delete s;
+    }
+
+    qDebug() << gtfs.findNearestStops(QPointF(60.5914f,22.3800f), 0, 0.005f);
+    qDebug() << gtfs.getRoute("23");
+
+    qDebug() << gtfs.getStops();
+
+    qDebug() << gtfs.getShape("0_358");
 
     db.close();
 
