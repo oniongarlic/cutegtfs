@@ -158,15 +158,34 @@ QVariantMap GTFSService::getRoute(const QString route_id)
 
 QVariantList GTFSService::getShape(const QString shape_id)
 {
-
     QSqlQuery q(m_db);
 
     q.setForwardOnly(true);
     q.prepare("SELECT shape_pt_lat AS lat,shape_pt_lon as LON,shape_pt_sequence AS seq,shape_dist_traveled AS dist FROM shapes WHERE shape_id=? ORDER BY seq");
     q.bindValue(0, shape_id);
 
-    return getAllListMap(q);
+    return getAllListMap(q);   
+}
 
+QVariantList GTFSService::getStopTrips(const QString stop_id, const QDate day)
+{
+    QSqlQuery q(m_db);
+
+    q.setForwardOnly(true);
+    q.prepare("SELECT t.route_id,route_short_name,arrival_time FROM stop_times AS st,trips AS t,routes AS r WHERE stop_id=? AND st.trip_id=t.trip_id AND t.route_id=r.route_id ORDER BY arrival_time");
+    q.bindValue(0, stop_id);
+
+    return getAllListMap(q);
+}
+
+QVariantList GTFSService::getAgencies()
+{
+    QSqlQuery q(m_db);
+
+    q.setForwardOnly(true);
+    q.prepare("SELECT agency_id,agency_name,agency_url,agency_timezone,agency_lang,agency_phone FROM agency ORDER BY agency_id");
+
+    return getAllListMap(q);
 }
 
 QString GTFSService::findStop(const QString stop_name)

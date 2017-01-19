@@ -90,9 +90,10 @@ int main(int argc, char *argv[])
     qDebug() << gtfs.findNearestStops(QPointF(60.5914f,22.3800f), 0, 0.005f);
     qDebug() << gtfs.getRoute("23");
 
-    qDebug() << gtfs.getStops();
+    //qDebug() << gtfs.getStops();
+    //qDebug() << gtfs.getShape("0_358");
 
-    qDebug() << gtfs.getShape("0_358");
+    qDebug() << gtfs.getStopTrips("1170", QDate::currentDate());
 
     db.close();
 

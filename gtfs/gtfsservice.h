@@ -7,6 +7,9 @@
 #include <QPointF>
 #include <QDebug>
 
+#include <QDate>
+#include <QDateTime>
+
 #include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QSqlRecord>
@@ -23,22 +26,6 @@ class GTFSService : public QObject
 public:
     explicit GTFSService(QSqlDatabase db, QObject *parent = 0);
 
-    //Q_INVOKABLE getRoute(QString route_name);
-    //Q_INVOKABLE getRoutes();
-
-    Q_INVOKABLE QString findStop(const QString stop_name);
-    Q_INVOKABLE QStringList findStops(const QString stop_name);
-    Q_INVOKABLE QString findNearestStop(const QPointF &pos, int type, double range);
-    Q_INVOKABLE QStringList findNearestStops(const QPointF &pos, int type, double range);
-
-    GTFSStop * getStop(const QString stop_id);
-
-    QVariantMap getRoute(const QString route_id);
-
-    QVariantList getShape(const QString shape_id);
-
-    Q_INVOKABLE QVariantList getStops();
-
     enum RouteTypes {
         LightRail=0, // : Tram, Streetcar, Light rail. Any light rail or street level system within a metropolitan area.
         Subway=1, // Subway, Metro. Any underground rail system within a metropolitan area.
@@ -49,6 +36,39 @@ public:
         Gondola=6, // Gondola, Suspended cable car. Typically used for aerial cable cars where the car is suspended from the cable.
         Funicular=7 // Funicular. Any rail system designed for steep inclines.
     };
+
+    enum PickupTypes {
+        RegularPickup=0, // Regularly scheduled pickup
+        NoPickup=1, // No pickup available
+        PhonePickup=2, // Must phone agency to arrange pickup
+        DriverPickup=3 // Must coordinate with driver to arrange pickup
+    };
+
+    enum StopTypes {
+        LocationStop=0, // Stop. A location where passengers board or disembark from a transit vehicle.
+        LocationStation=1 // Station. A physical structure or area that contains one or more stop.
+    };
+
+    //Q_INVOKABLE getRoute(QString route_name);
+    //Q_INVOKABLE getRoutes();
+
+    Q_INVOKABLE QString findStop(const QString stop_name);
+    Q_INVOKABLE QStringList findStops(const QString stop_name);
+    Q_INVOKABLE QString findNearestStop(const QPointF &pos, int type, double range);
+    Q_INVOKABLE QStringList findNearestStops(const QPointF &pos, int type, double range);
+
+    GTFSStop * getStop(const QString stop_id);
+
+    Q_INVOKABLE QVariantMap getRoute(const QString route_id);
+
+    Q_INVOKABLE QVariantList getShape(const QString shape_id);
+
+    Q_INVOKABLE QVariantList getStopTrips(const QString stop_id, const QDate day);
+
+    Q_INVOKABLE QVariantList getAgencies();
+
+    Q_INVOKABLE QVariantList getStops();
+    // Q_INVOKABLE QVariantList getStopsInside(const QPointF &a, const QPointF &b);
 
 signals:
 
