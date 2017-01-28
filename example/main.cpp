@@ -56,7 +56,11 @@ int main(int argc, char *argv[])
     qDebug() << tables;
 
     if (tables.count()==0) {
-        importData();
+        bool r=importData();
+        if (!r) {
+            qWarning("Failed to import zip data");
+            exit(2);
+        }
     }
 
     GTFSService gtfs(db);
