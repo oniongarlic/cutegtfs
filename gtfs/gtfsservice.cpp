@@ -10,6 +10,15 @@ GTFSService::GTFSService(QSqlDatabase db, QObject *parent) : QObject(parent)
     m_has_fares=tables.contains("fares");
     m_has_transfers=tables.contains("transfers");
     m_has_freq=tables.contains("frequencies");
+    m_has_dates=tables.contains("calendar_dates");
+
+    qDebug() << "Shapes" << m_has_shapes;
+    qDebug() << "Dates" << m_has_dates;
+}
+
+QString GTFSService::dateToGTFSDate(const QDate &date)
+{
+    return date.toString("yyyyMMdd");
 }
 
 QString GTFSService::getOne(QSqlQuery &q)
@@ -17,15 +26,15 @@ QString GTFSService::getOne(QSqlQuery &q)
     QString r;
 
     if (!q.exec()) {
-        qWarning("Query failed");
-        qDebug() << q.lastError().text();
+        qDebug() << "Query failed" << q.lastError().text();
         return r;
     }
-    if (q.isActive() && q.first()) {
-        r.append(q.value(0).toString());
-    } else {
-        qDebug() << q.lastQuery() << q.lastError().text();
+    if (!q.isActive()) {
+        qDebug() << "Query failed, not active"<< q.lastQuery() << q.lastError().text();
+        return r;
     }
+    if (q.first())
+        r.append(q.value(0).toString());
 
     return r;
 }
@@ -49,8 +58,20 @@ QVariantMap GTFSService::r2m(const QSqlRecord &record)
 {
     QVariantMap map;
 
-    for(int i = 0; i < record.count(); i++)
-        map.insert(record.fieldName(i), record.value(i));
+    for(int i = 0; i < record.count(); i++) {
+        QString f=record.fieldName(i);
+        QVariant v=record.value(i);
+
+        if (f.endsWith("_time__")) {
+            QTime t=QTime::fromString(v.toString(), "hh:mm:ss");
+            map.insert(f, t);
+        } else if (f.endsWith("_date")) {
+            QDate t=QDate::fromString(v.toString(), "yyyyMMdd");
+            map.insert(f, t);
+        } else {
+            map.insert(f, record.value(i));
+        }
+    }
 
     return map;
 }
@@ -91,7 +112,7 @@ QVariantList GTFSService::getAllListMap(QSqlQuery &q)
             r << m;
         }
     } else {
-        qDebug() << q.lastQuery() << q.lastError().text();
+        qDebug() << "Error" << q.lastQuery() << q.lastError().text();
     }
 
     return r;
@@ -164,18 +185,90 @@ QVariantList GTFSService::getShape(const QString shape_id)
     q.prepare("SELECT shape_pt_lat AS lat,shape_pt_lon as LON,shape_pt_sequence AS seq,shape_dist_traveled AS dist FROM shapes WHERE shape_id=? ORDER BY seq");
     q.bindValue(0, shape_id);
 
-    return getAllListMap(q);   
+    return getAllListMap(q);
 }
 
-QVariantList GTFSService::getStopTrips(const QString stop_id, const QDate day)
+QVariantList GTFSService::getStopTrips(const QString stop_id, const QDate date)
 {
     QSqlQuery q(m_db);
+    QVariantList stops;
 
     q.setForwardOnly(true);
-    q.prepare("SELECT t.route_id,route_short_name,arrival_time FROM stop_times AS st,trips AS t,routes AS r WHERE stop_id=? AND st.trip_id=t.trip_id AND t.route_id=r.route_id ORDER BY arrival_time");
+    q.prepare("SELECT t.route_id AS route_id,t.service_id,t.trip_id,t.shape_id,direction_id,block_id,route_short_name,arrival_time,departure_time FROM stop_times AS st,trips AS t,routes AS r WHERE stop_id=? AND st.trip_id=t.trip_id AND t.route_id=r.route_id ORDER BY arrival_time");
     q.bindValue(0, stop_id);
 
-    return getAllListMap(q);
+    stops=getAllListMap(q);
+
+    QMutableListIterator<QVariant> i(stops);
+    while (i.hasNext()) {
+        QVariantMap s=i.next().toMap();
+        //qDebug() << "STOP DATA:" << s;
+
+        bool is=isServiceOnDate(s.value("service_id").toString(), date);
+        if (is==false)
+            i.remove();
+    }
+
+    return stops;
+}
+
+/**
+ * @brief GTFSService::isServiceOnDate
+ * @param service_id
+ * @param date
+ * @return
+ *
+ * Check if given service_id is available on the given date by looking into the calendar table for day specific details.
+ *
+ */
+bool GTFSService::isServiceOnDate(const QString &service_id, const QDate &date)
+{
+    QSqlQuery q(m_db);
+    QString dayStr;
+    int day=date.dayOfWeek();
+
+    dayStr=days().value(day);
+
+    // First check calendar table for service entry
+    q.prepare("SELECT "+dayStr+" FROM calendar WHERE start_date<=? AND ?<=end_date AND service_id=?");
+    q.bindValue(0, dateToGTFSDate(date));
+    q.bindValue(1, dateToGTFSDate(date));
+    q.bindValue(2, service_id);
+
+    QString qr=getOne(q);
+
+    //qDebug() << service_id << date << qr;
+
+    if (qr.isEmpty()) {
+        qWarning() << "Calendar information not available for service " << service_id << " on day " << date;
+        // return true;
+    }
+
+    // Check return value, in case value is 1 it
+    if (qr=="1" && !m_has_dates)
+        return true;
+    else if (qr=="0" && !m_has_dates)
+        return false;
+
+    if (m_has_dates) {
+        QSqlQuery q(m_db);
+
+        qDebug() << "Exception check " << service_id << date;
+
+        q.prepare("SELECT exception_type FROM calendar_dates WHERE service_id=? AND date=?");
+        q.bindValue(0, service_id);
+        q.bindValue(1, dateToGTFSDate(date));
+
+        QString et=getOne(q);
+
+        if (et=="1")
+            return true;
+        if (et=="0")
+            return false;
+    }
+
+
+    return false;
 }
 
 QVariantList GTFSService::getAgencies()

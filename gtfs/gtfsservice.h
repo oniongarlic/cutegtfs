@@ -63,13 +63,14 @@ public:
 
     Q_INVOKABLE QVariantList getShape(const QString shape_id);
 
-    Q_INVOKABLE QVariantList getStopTrips(const QString stop_id, const QDate day);
+    Q_INVOKABLE QVariantList getStopTrips(const QString stop_id, const QDate date);
 
     Q_INVOKABLE QVariantList getAgencies();
 
     Q_INVOKABLE QVariantList getStops();
     // Q_INVOKABLE QVariantList getStopsInside(const QPointF &a, const QPointF &b);
 
+    bool isServiceOnDate(const QString &service_id, const QDate &date);
 signals:
 
 public slots:
@@ -90,6 +91,20 @@ private:
 
     QCache<QString, GTFSStop>m_stops;
     QVariantMap r2m(const QSqlRecord &record);
+    QString dateToGTFSDate(const QDate &date);
+
+    QHash<int, QByteArray> days() const {
+        QHash<int, QByteArray> days;
+        days[Qt::Monday] = "monday";
+        days[Qt::Tuesday] = "tuesday";
+        days[Qt::Wednesday] = "wednesday";
+        days[Qt::Thursday] = "thursday";
+        days[Qt::Friday] = "friday";
+        days[Qt::Saturday] = "saturday";
+        days[Qt::Sunday] = "sunday";
+        return days;
+    }
+
 };
 
 #endif // GTFSSERVICE_H
