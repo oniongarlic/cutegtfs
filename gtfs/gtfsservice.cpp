@@ -54,6 +54,24 @@ QVariantMap GTFSService::getOneMap(QSqlQuery &q)
     return r;
 }
 
+int GTFSService::timeStringToSeconds(const QString &f)
+{
+    int h,m,s;
+    bool ok;
+
+    h=f.mid(0,2).toInt(&ok);
+    if (!ok)
+        return -1;
+    m=f.mid(3,2).toInt(&ok);
+    if (!ok)
+        return -1;
+    s=f.mid(6,2).toInt(&ok);
+    if (!ok)
+        return -1;
+
+    return s+m*60+h*60*60;
+}
+
 QVariantMap GTFSService::r2m(const QSqlRecord &record)
 {
     QVariantMap map;
@@ -62,9 +80,11 @@ QVariantMap GTFSService::r2m(const QSqlRecord &record)
         QString f=record.fieldName(i);
         QVariant v=record.value(i);
 
-        if (f.endsWith("_time__")) {
-            QTime t=QTime::fromString(v.toString(), "hh:mm:ss");
-            map.insert(f, t);
+        if (f.endsWith("_time")) {
+            int s=timeStringToSeconds(v.toString());
+            if (s==-1)
+                qWarning() << "Failed to parse timestamp" << v;
+            map.insert(f, s);
         } else if (f.endsWith("_date")) {
             QDate t=QDate::fromString(v.toString(), "yyyyMMdd");
             map.insert(f, t);

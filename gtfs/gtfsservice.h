@@ -105,6 +105,7 @@ private:
         return days;
     }
 
+    int timeStringToSeconds(const QString &f);
 };
 
 #endif // GTFSSERVICE_H
