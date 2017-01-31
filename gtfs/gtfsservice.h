@@ -63,7 +63,7 @@ public:
 
     Q_INVOKABLE QVariantList getShape(const QString shape_id);
 
-    Q_INVOKABLE QVariantList getStopTrips(const QString stop_id, const QDate date);
+    Q_INVOKABLE QVariantList getStopTrips(const QString stop_id, const QDate date, const int after=0);
 
     Q_INVOKABLE QVariantList getAgencies();
 

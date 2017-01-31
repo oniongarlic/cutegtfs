@@ -208,7 +208,7 @@ QVariantList GTFSService::getShape(const QString shape_id)
     return getAllListMap(q);
 }
 
-QVariantList GTFSService::getStopTrips(const QString stop_id, const QDate date)
+QVariantList GTFSService::getStopTrips(const QString stop_id, const QDate date, const int after)
 {
     QSqlQuery q(m_db);
     QVariantList stops;
@@ -225,8 +225,15 @@ QVariantList GTFSService::getStopTrips(const QString stop_id, const QDate date)
         //qDebug() << "STOP DATA:" << s;
 
         bool is=isServiceOnDate(s.value("service_id").toString(), date);
-        if (is==false)
+        if (is==false) {
             i.remove();
+            continue;
+        }
+        if (after>0) {
+            int at=s.value("arrival_time").toInt();
+            if (at<after)
+                i.remove();
+        }
     }
 
     return stops;
